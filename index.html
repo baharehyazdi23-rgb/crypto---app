@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 تحلیلگر حرفه‌ای بازار رمزارزها</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-0: #f5f7fb;
+  --bg-1: #ffffff;
+  --bg-2: #eef1f8;
+  --card: #ffffff;
+  --card-hover: #fafbff;
+  --border: #e3e7f0;
+  --border-hover: #cdd4e3;
+  --text: #1a1d2e;
+  --text-dim: #5b6178;
+  --text-faint: #9096a8;
+  --accent: #ff3b6b;
+  --accent-2: #ff8a4c;
+  --accent-soft: #fff0f4;
+  --accent-glow: rgba(255,59,107,0.18);
+  --green: #0aa86a;
+  --green-soft: #e6f9f0;
+  --red: #e63946;
+  --red-soft: #fdecee;
+  --yellow: #d99a00;
+  --yellow-soft: #fff6e0;
+  --blue: #4c5bff;
+  --blue-soft: #eef0ff;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow-sm: 0 1px 3px rgba(20,25,50,0.05), 0 1px 2px rgba(20,25,50,0.03);
+  --shadow-md: 0 4px 16px rgba(20,25,50,0.07), 0 1px 3px rgba(20,25,50,0.04);
+  --shadow-lg: 0 12px 40px rgba(20,25,50,0.1), 0 4px 12px rgba(20,25,50,0.05);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+  min-height: 100vh;
+  padding: 24px;
+  overflow-x: hidden;
+  line-height: 1.6;
+  background-image:
+    radial-gradient(ellipse 800px 600px at 90% 0%, rgba(255,59,107,0.08), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 10% 100%, rgba(76,91,255,0.07), transparent 60%),
+    radial-gradient(ellipse 500px 400px at 50% 50%, rgba(255,138,76,0.04), transparent 70%);
+  background-attachment: fixed;
+}
+
+.container { max-width: 1480px; margin: 0 auto; position: relative; }
+
+/* ============ صفحه لاگین ============ */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #f5f7fb 0%, #eef1f8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+.login-box {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  padding: 40px 32px;
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  overflow: hidden;
+}
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+.login-icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+  margin: 0 auto 20px;
+  box-shadow: 0 10px 30px var(--accent-glow);
+}
+.login-box h2 {
+  font-size: 1.4em;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.login-box p {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+.login-input {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  font-family: inherit;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.25s;
+  direction: ltr;
+}
+.login-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 22px var(--accent-glow);
+  transition: all 0.25s;
+}
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px var(--accent-glow);
+}
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.login-msg {
+  margin-top: 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  min-height: 20px;
+}
+.login-msg.err { color: var(--red); }
+.login-msg.ok { color: var(--green); }
+.login-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* ============ هدر ============ */
+.header {
+  position: relative;
+  padding: 32px 32px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #fefeff 100%);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+}
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 18px; }
+.brand-icon {
+  width: 62px; height: 62px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 10px 30px var(--accent-glow);
+  flex-shrink: 0;
+}
+.brand-text h1 {
+  font-size: 1.7em;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #1a1d2e 30%, #ff3b6b 130%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand-text p {
+  color: var(--text-dim);
+  font-size: 0.9em;
+  margin-top: 3px;
+}
+.header-badges { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.pill-accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 6px 18px var(--accent-glow);
+}
+.pill-warn {
+  background: var(--yellow-soft);
+  color: var(--yellow);
+  border-color: rgba(217,154,0,0.25);
+}
+.pill-live {
+  background: var(--green-soft);
+  color: var(--green);
+  border-color: rgba(10,168,106,0.25);
+}
+.dot-live {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  animation: blink 1.6s ease-in-out infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* ============ کارت‌های آمار ============ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  position: relative;
+  padding: 22px 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s;
+}
+.stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--blue), #8ea2ff); }
+.stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--green), #4ddba0); }
+.stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--yellow), #ffc93c); }
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+}
+.stat-card:hover::before { transform: scaleX(1); }
+.stat-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(255,59,107,0.15);
+}
+.stat-card:nth-child(2) .stat-icon { background: var(--blue-soft); border-color: rgba(76,91,255,0.15); }
+.stat-card:nth-child(3) .stat-icon { background: var(--green-soft); border-color: rgba(10,168,106,0.15); }
+.stat-card:nth-child(4) .stat-icon { background: var(--yellow-soft); border-color: rgba(217,154,0,0.15); }
+.stat-number {
+  font-size: 1.7em;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  color: var(--text-faint);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ============ چیدمان اصلی ============ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.panel:hover { box-shadow: var(--shadow-md); border-color: var(--border-hover); }
+
+.panel-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: linear-gradient(180deg, #fafbff, #ffffff);
+}
+.panel-title { display: flex; align-items: center; gap: 12px; }
+.panel-title h2 { font-size: 1.1em; font-weight: 800; color: var(--text); }
+.panel-title .sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+.panel-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  background: linear-gradient(135deg, var(--accent-soft), #ffe8d6);
+  border: 1px solid rgba(255,59,107,0.15);
+  flex-shrink: 0;
+}
+.panel-body { padding: 22px 24px; }
+
+/* ============ کنترل‌ها ============ */
+.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.field { position: relative; display: flex; align-items: center; }
+.field-icon {
+  position: absolute;
+  right: 12px;
+  color: var(--text-faint);
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+select {
+  padding: 11px 38px 11px 34px;
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13.5px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%235b6178' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  min-width: 150px;
+}
+select:hover { border-color: var(--border-hover); background-color: #fff; }
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background-color: #fff;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 6px 18px var(--accent-glow);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px var(--accent-glow);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-ghost {
+  background: var(--bg-0);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: #fff;
+  color: var(--text);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============ نمودار ============ */
+.chart-wrap {
+  position: relative;
+  height: 400px;
+  background: linear-gradient(180deg, #fafbff, #ffffff);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+.chart-stats {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.chart-stat { display: flex; flex-direction: column; gap: 2px; }
+.chart-stat .k { font-size: 11px; color: var(--text-faint); font-weight: 700; letter-spacing: 0.4px; }
+.chart-stat .v { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.v-up { color: var(--green); }
+.v-down { color: var(--red); }
+.v-neutral { color: var(--text); }
+
+/* ============ بخش سیگنال‌ها ============ */
+.signal-section { margin-bottom: 20px; }
+
+.signal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.signal-toolbar h2 {
+  font-size: 1.25em;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.signal-toolbar h2 .badge-count {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 20px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.btn-show-all {
+  background: linear-gradient(135deg, var(--blue), #7c8bff);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(76,91,255,0.22);
+}
+.btn-show-all:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(76,91,255,0.3);
+}
+.btn-show-all.active {
+  background: linear-gradient(135deg, #2f3bd9, var(--blue));
+  box-shadow: 0 6px 24px rgba(76,91,255,0.35);
+}
+
+.btn-filter {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 6px 18px var(--accent-glow);
+}
+.btn-filter:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px var(--accent-glow);
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(20,25,50,0.15);
+  padding: 8px;
+  min-width: 220px;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  animation: dropIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.filter-dropdown.open { display: flex; }
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  transition: all 0.18s;
+  text-align: right;
+  width: 100%;
+}
+.filter-option:hover { background: var(--bg-0); }
+.filter-option.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.filter-option .opt-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.filter-option[data-value="strong_buy"] .opt-icon { background: rgba(0,255,157,0.15); }
+.filter-option[data-value="buy"] .opt-icon { background: var(--green-soft); }
+.filter-option[data-value="hold"] .opt-icon { background: var(--yellow-soft); }
+.filter-option[data-value="sell"] .opt-icon { background: var(--red-soft); }
+.filter-option[data-value="strong_sell"] .opt-icon { background: rgba(230,57,70,0.18); }
+
+.filter-option .opt-count {
+  margin-right: auto;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--bg-0);
+  color: var(--text-dim);
+}
+.filter-option.active .opt-count {
+  background: #fff;
+  color: var(--accent);
+}
+
+/* ============ لیست سیگنال ============ */
+.signal-list-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.signal-list-header {
+  padding: 16px 22px;
+  background: linear-gradient(180deg, #fafbff, #ffffff);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.signal-list-header .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 14.5px;
+  color: var(--text);
+}
+.signal-list-header .title .dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: all 0.3s;
+}
+.signal-list-header .hint { font-size: 12px; color: var(--text-faint); font-weight: 600; }
+
+.signal-rows { max-height: 520px; overflow-y: auto; padding: 6px 0; }
+.signal-rows::-webkit-scrollbar { width: 6px; }
+.signal-rows::-webkit-scrollbar-track { background: transparent; }
+.signal-rows::-webkit-scrollbar-thumb { background: rgba(255,59,107,0.3); border-radius: 10px; }
+.signal-rows::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+.sig-row {
+  display: grid;
+  grid-template-columns: 42px 1.6fr 1fr 1fr 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 22px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  transition: background 0.2s;
+}
+.sig-row:hover { background: #fafbff; }
+.sig-row:last-child { border-bottom: none; }
+
+.sig-rank {
+  font-size: 12px;
+  color: var(--text-faint);
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.sig-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sig-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eef1f8, #e0e5f0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.sig-info { min-width: 0; }
+.sig-info .n {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sig-info .s { font-size: 11px; color: var(--text-faint); font-weight: 700; letter-spacing: 0.5px; }
+.sig-price {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  text-align: left;
+  direction: ltr;
+  font-variant-numeric: tabular-nums;
+}
+.sig-change {
+  font-size: 12.5px;
+  font-weight: 800;
+  text-align: left;
+  direction: ltr;
+  padding: 5px 11px;
+  border-radius: 8px;
+  justify-self: start;
+  font-variant-numeric: tabular-nums;
+}
+.chg-up { color: var(--green); background: var(--green-soft); }
+.chg-down { color: var(--red); background: var(--red-soft); }
+.chg-flat { color: var(--yellow); background: var(--yellow-soft); }
+
+.sig-chip {
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 13px;
+  border-radius: 20px;
+  text-align: center;
+  justify-self: end;
+  white-space: nowrap;
+}
+.sig-strong-buy { color: #00a862; background: rgba(0,255,157,0.15); border: 1px solid rgba(0,200,120,0.3); }
+.sig-buy { color: var(--green); background: var(--green-soft); border: 1px solid rgba(10,168,106,0.25); }
+.sig-hold { color: var(--yellow); background: var(--yellow-soft); border: 1px solid rgba(217,154,0,0.25); }
+.sig-sell { color: var(--red); background: var(--red-soft); border: 1px solid rgba(230,57,70,0.25); }
+.sig-strong-sell { color: #a81322; background: rgba(230,57,70,0.18); border: 1px solid rgba(200,30,44,0.35); }
+
+/* ============ لودر و خالی ============ */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+}
+.spinner {
+  width: 42px; height: 42px;
+  border: 3px solid rgba(255,59,107,0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-faint); }
+.empty-state .ico { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state .txt { font-size: 14px; font-weight: 600; }
+.empty-state .sub { font-size: 12px; margin-top: 6px; color: var(--text-faint); }
+
+/* ============ توست ============ */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: #1a1d2e;
+  border: 1px solid rgba(255,59,107,0.4);
+  padding: 13px 26px;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: 0 20px 60px rgba(20,25,50,0.3);
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  max-width: 90%;
+  text-align: center;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ============ ریسپانسیو ============ */
+@media (max-width: 1100px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  body { padding: 14px; }
+  .header { padding: 22px 20px; }
+  .brand-icon { width: 52px; height: 52px; font-size: 25px; }
+  .brand-text h1 { font-size: 1.25em; }
+  .brand-text p { font-size: 0.8em; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 16px 14px; }
+  .stat-number { font-size: 1.35em; }
+  .stat-icon { width: 34px; height: 34px; font-size: 16px; }
+  .panel-header { padding: 16px 18px; }
+  .panel-body { padding: 16px 18px; }
+  .controls { width: 100%; }
+  .field, select { flex: 1; min-width: 0; }
+  .btn { flex: 1; justify-content: center; }
+  .chart-wrap { height: 300px; padding: 10px; }
+  .signal-toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-actions { width: 100%; }
+  .toolbar-actions .btn { flex: 1; justify-content: center; }
+  .filter-dropdown { left: 0; right: 0; min-width: 0; width: 100%; }
+  .sig-row {
+    grid-template-columns: 30px 1.4fr 1fr;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+  .sig-change { grid-column: 2 / 3; justify-self: start; }
+  .sig-chip { grid-column: 3 / 4; grid-row: 1 / 3; align-self: center; }
+  .sig-price { grid-column: 3 / 4; }
+  .sig-avatar { width: 30px; height: 30px; font-size: 10px; }
+}
+@media (max-width: 420px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .sig-row { grid-template-columns: 26px 1fr auto; padding: 10px 12px; }
+  .sig-info .n { font-size: 12.5px; }
+  .sig-price { font-size: 12.5px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== صفحه لاگین ====== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <h2>ورود به برنامه</h2>
+    <p>برای دسترسی، رمز یکبارمصرف خود را وارد کنید</p>
+    <input type="text" id="loginCode" class="login-input" 
+           placeholder="XXXXXX" maxlength="12" autocomplete="off" />
+    <button id="loginBtn" class="login-btn">ورود به برنامه</button>
+    <div class="login-msg" id="loginMsg"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ====== هدر ====== -->
+  <header class="header">
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-icon">📊</div>
+        <div class="brand-text">
+          <h1>تحلیلگر حرفه‌ای بازار رمزارزها</h1>
+          <p>قیمت لحظه‌ای • نمودار پیشرفته • سیگنال هوشمند خرید و فروش</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="pill pill-live"><span class="dot-live"></span> زنده</span>
+        <span class="pill pill-accent">⚡ ۵۰ رمزارز</span>
+        <span class="pill pill-warn">⏱ تاخیر ۲-۵ دقیقه</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====== آمار کلی ====== -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-head"><div class="stat-icon">🪙</div></div>
+      <div class="stat-number" id="totalCoins">—</div>
+      <div class="stat-label">تعداد رمزارز</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-head"><div class="stat-icon">💧</div></div>
+      <div class="stat-number" id="totalVolume">—</div>
+      <div class="stat-label">حجم کل بازار</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-head"><div class="stat-icon">📈</div></div>
+      <div class="stat-number" id="avgChange">—</div>
+      <div class="stat-label">میانگین تغییرات</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-head"><div class="stat-icon">🏆</div></div>
+      <div class="stat-number" id="bestCoin">—</div>
+      <div class="stat-label">بهترین عملکرد</div>
+    </div>
+  </section>
+
+  <!-- ====== بخش سیگنال‌ها ====== -->
+  <section class="signal-section">
+    <div class="signal-toolbar">
+      <h2>
+        🎯 سیگنال‌های معاملاتی
+        <span class="badge-count" id="filterCount">—</span>
+      </h2>
+
+      <div class="toolbar-actions">
+        <button class="btn btn-show-all active" id="btnShowAll">
+          📋 نمایش همه
+        </button>
+
+        <div style="position: relative;">
+          <button class="btn btn-filter" id="btnFilterMenu">
+            🎯 فیلتر سیگنال‌ها <span style="font-size:10px; margin-right:4px;">▼</span>
+          </button>
+          <div class="filter-dropdown" id="filterDropdown">
+            <button class="filter-option" data-value="strong_buy">
+              <div class="opt-icon">🚀</div>
+              <span>خرید قوی</span>
+              <span class="opt-count" id="opt-strong_buy">0</span>
+            </button>
+            <button class="filter-option" data-value="buy">
+              <div class="opt-icon">📈</div>
+              <span>خرید</span>
+              <span class="opt-count" id="opt-buy">0</span>
+            </button>
+            <button class="filter-option" data-value="hold">
+              <div class="opt-icon">⏸️</div>
+              <span>نگهداری</span>
+              <span class="opt-count" id="opt-hold">0</span>
+            </button>
+            <button class="filter-option" data-value="sell">
+              <div class="opt-icon">📉</div>
+              <span>فروش</span>
+              <span class="opt-count" id="opt-sell">0</span>
+            </button>
+            <button class="filter-option" data-value="strong_sell">
+              <div class="opt-icon">⚠️</div>
+              <span>فروش قوی</span>
+              <span class="opt-count" id="opt-strong_sell">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="signal-list-panel">
+      <div class="signal-list-header">
+        <div class="title">
+          <span class="dot" id="listDot"></span>
+          <span id="listTitle">همه رمزارزها</span>
+        </div>
+        <div class="hint" id="listHint">آماده نمایش</div>
+      </div>
+      <div class="signal-rows" id="signalRows">
+        <div class="loader">
+          <div class="spinner"></div>
+          <div>در حال دریافت داده‌های بازار...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== چیدمان اصلی ====== -->
+  <section class="main-grid">
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon">📈</div>
+          <div>
+            <h2>نمودار قیمت</h2>
+            <div class="sub">روند تاریخی قیمت رمزارز انتخابی</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="controls" style="margin-bottom:16px;">
+          <div class="field">
+            <span class="field-icon">🪙</span>
+            <select id="chartSymbol"></select>
+          </div>
+          <div class="field">
+            <span class="field-icon">📅</span>
+            <select id="chartDays">
+              <option value="7">۷ روز</option>
+              <option value="14">۱۴ روز</option>
+              <option value="30" selected>۳۰ روز</option>
+              <option value="90">۹۰ روز</option>
+              <option value="180">۱۸۰ روز</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="chartBtn">📊 نمایش</button>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="priceChart"></canvas>
+        </div>
+        <div class="chart-stats" id="chartStats"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon">💹</div>
+          <div>
+            <h2>تحلیل لحظه‌ای بازار</h2>
+            <div class="sub" id="marketSub">در حال بارگذاری...</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="marketBtn">🔄 بروزرسانی</button>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <div class="signal-rows" id="marketBody">
+          <div class="loader">
+            <div class="spinner"></div>
+            <div>در حال دریافت داده‌های بازار...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================
+   سیستم لاگین
+===================================================== */
+const AUTH_URL = '/api/check'; // آدرس نسبی، روی خود Cloudflare
+
+function getDeviceId() {
+  let id = localStorage.getItem('device_id');
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).substr(2, 12);
+    localStorage.setItem('device_id', id);
+  }
+  return id;
+}
+
+async function doLogin() {
+  const input = document.getElementById('loginCode').value.trim().toUpperCase();
+  const msg = document.getElementById('loginMsg');
+  const btn = document.getElementById('loginBtn');
+
+  if (!input) {
+    msg.className = 'login-msg err';
+    msg.textContent = 'رمز را وارد کنید';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'در حال بررسی <span class="login-spinner"></span>';
+  msg.textContent = '';
+
+  try {
+    const fd = new URLSearchParams();
+    fd.append('code', input);
+    fd.append('device_id', getDeviceId());
+
+    const res = await fetch(AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: fd.toString()
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      msg.className = 'login-msg ok';
+      msg.textContent = '✅ ' + data.msg;
+      localStorage.setItem('logged_in', 'true');
+      setTimeout(() => {
+        document.getElementById('loginScreen').style.display = 'none';
+      }, 700);
+    } else {
+      msg.className = 'login-msg err';
+      msg.textContent = '❌ ' + data.msg;
+      btn.disabled = false;
+      btn.textContent = 'ورود به برنامه';
+    }
+  } catch (e) {
+    msg.className = 'login-msg err';
+    msg.textContent = '⚠️ خطا در ارتباط با سرور';
+    btn.disabled = false;
+    btn.textContent = 'ورود به برنامه';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('logged_in') === 'true') {
+    document.getElementById('loginScreen').style.display = 'none';
+  }
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('loginCode').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+
+/* =====================================================
+   پیکربندی رمزارزها
+===================================================== */
+const COINS = [
+  { id: 'bitcoin', name: 'بیت‌کوین', sym: 'BTC' },
+  { id: 'ethereum', name: 'اتریوم', sym: 'ETH' },
+  { id: 'binancecoin', name: 'بایننس کوین', sym: 'BNB' },
+  { id: 'ripple', name: 'ریپل', sym: 'XRP' },
+  { id: 'cardano', name: 'کاردانو', sym: 'ADA' },
+  { id: 'solana', name: 'سولانا', sym: 'SOL' },
+  { id: 'dogecoin', name: 'داوج کوین', sym: 'DOGE' },
+  { id: 'polkadot', name: 'پولکادات', sym: 'DOT' },
+  { id: 'tron', name: 'ترون', sym: 'TRX' },
+  { id: 'litecoin', name: 'لایت‌کوین', sym: 'LTC' },
+  { id: 'shiba-inu', name: 'شیبا اینو', sym: 'SHIB' },
+  { id: 'avalanche-2', name: 'آوالانچ', sym: 'AVAX' },
+  { id: 'chainlink', name: 'چین‌لینک', sym: 'LINK' },
+  { id: 'polygon', name: 'پالیگان', sym: 'MATIC' },
+  { id: 'uniswap', name: 'یونی‌سواپ', sym: 'UNI' },
+  { id: 'cosmos', name: 'کازموس', sym: 'ATOM' },
+  { id: 'near', name: 'نیر', sym: 'NEAR' },
+  { id: 'algorand', name: 'آلگوراند', sym: 'ALGO' },
+  { id: 'filecoin', name: 'فایل‌کوین', sym: 'FIL' },
+  { id: 'vechain', name: 'وی‌چین', sym: 'VET' },
+  { id: 'theta', name: 'تتا', sym: 'THETA' },
+  { id: 'internet-computer', name: 'اینترنت کامپیوتر', sym: 'ICP' },
+  { id: 'ethereum-classic', name: 'اتریوم کلاسیک', sym: 'ETC' },
+  { id: 'gala', name: 'گالا', sym: 'GALA' },
+  { id: 'axie-infinity', name: 'اکسی اینفینیتی', sym: 'AXS' },
+  { id: 'decentraland', name: 'دیسنترالند', sym: 'MANA' },
+  { id: 'the-sandbox', name: 'سندباکس', sym: 'SAND' },
+  { id: 'curve-dao-token', name: 'کروو دائو', sym: 'CRV' },
+  { id: 'aave', name: 'آوی', sym: 'AAVE' },
+  { id: 'maker', name: 'میکر', sym: 'MKR' },
+  { id: 'compound-governance-token', name: 'کامپاند', sym: 'COMP' },
+  { id: 'sushi', name: 'سوشی', sym: 'SUSHI' },
+  { id: 'yearn-finance', name: 'یرن فایننس', sym: 'YFI' },
+  { id: 'pancakeswap-token', name: 'پنکیک سواپ', sym: 'CAKE' },
+  { id: 'fantom', name: 'فانتوم', sym: 'FTM' },
+  { id: 'harmony', name: 'هارمونی', sym: 'ONE' },
+  { id: 'zilliqa', name: 'زیلیکا', sym: 'ZIL' },
+  { id: 'enjincoin', name: 'انجین کوین', sym: 'ENJ' },
+  { id: 'flow', name: 'فلو', sym: 'FLOW' },
+  { id: 'chiliz', name: 'چیلیز', sym: 'CHZ' },
+  { id: 'basic-attention-token', name: 'بت', sym: 'BAT' },
+  { id: 'loopring', name: 'لوپرینگ', sym: 'LRC' },
+  { id: 'storj', name: 'استورج', sym: 'STORJ' },
+  { id: 'ankr', name: 'انکر', sym: 'ANKR' },
+  { id: 'ocean-protocol', name: 'اوشن پروتکل', sym: 'OCEAN' },
+  { id: 'numeraire', name: 'نومریِر', sym: 'NMR' },
+  { id: 'band-protocol', name: 'بند پروتکل', sym: 'BAND' },
+  { id: 'uma', name: 'یو‌ام‌ای', sym: 'UMA' },
+  { id: 'kava', name: 'کاوا', sym: 'KAVA' },
+  { id: 'matic-network', name: 'پالیگان (شبکه)', sym: 'MATIC' }
+];
+
+const UNIQUE_COINS = Array.from(new Map(COINS.map(c => [c.id, c])).values());
+
+const $ = id => document.getElementById(id);
+
+function fmtCompact(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1e12) return '$' + (n/1e12).toFixed(2) + 'T';
+  if (n >= 1e9)  return '$' + (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6)  return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3)  return '$' + (n/1e3).toFixed(2) + 'K';
+  return '$' + n.toFixed(2);
+}
+function fmtPrice(p) {
+  if (p === null || p === undefined) return '—';
+  if (p >= 1000) return '$' + p.toLocaleString('en-US', {maximumFractionDigits: 2});
+  if (p >= 1)    return '$' + p.toFixed(2);
+  if (p >= 0.01) return '$' + p.toFixed(4);
+  return '$' + p.toFixed(6);
+}
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+const SIGNALS = {
+  strong_buy:  { label: 'خرید قوی',  cls: 'sig-strong-buy', icon: '🚀', color: '#00c97a' },
+  buy:         { label: 'خرید',      cls: 'sig-buy',        icon: '📈', color: '#0aa86a' },
+  hold:        { label: 'نگهداری',   cls: 'sig-hold',       icon: '⏸️', color: '#d99a00' },
+  sell:        { label: 'فروش',      cls: 'sig-sell',       icon: '📉', color: '#e63946' },
+  strong_sell: { label: 'فروش قوی',  cls: 'sig-strong-sell',icon: '⚠️', color: '#c81e2c' }
+};
+function getSignalKey(change) {
+  if (change > 8)  return 'strong_buy';
+  if (change > 3)  return 'buy';
+  if (change > -2) return 'hold';
+  if (change > -8) return 'sell';
+  return 'strong_sell';
+}
+
+function populateSelect() {
+  const sel = $('chartSymbol');
+  sel.innerHTML = UNIQUE_COINS
+    .map(c => `<option value="${c.id}">${c.name} (${c.sym})</option>`)
+    .join('');
+  sel.value = 'bitcoin';
+}
+
+async function fetchMarket() {
+  const ids = UNIQUE_COINS.map(c => c.id).join(',');
+  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h`;
+  const res = await fetch(url, { headers: { 'accept': 'application/json' } });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if (!Array.isArray(data) || !data.length) throw new Error('داده خالی');
+  return data;
+}
+
+function generateMockMarket() {
+  const bases = [67000, 3500, 580, 0.52, 0.45, 165, 0.15, 7.2, 0.12, 85, 0.00002,
+    38, 17, 0.72, 11, 9.5, 5.8, 0.22, 5.6, 0.028, 1.9, 12, 26, 0.045,
+    8.5, 0.42, 0.35, 0.55, 95, 2400, 55, 1.2, 6500, 2.4, 0.85, 0.03,
+    0.02, 0.28, 0.18, 0.11, 0.15, 0.28, 0.5, 0.02, 0.05, 22, 3.2, 2.1, 0.72, 1.1];
+  return UNIQUE_COINS.map((c, i) => {
+    const base = bases[i] || (Math.random() * 100 + 1);
+    const r = Math.random();
+    let change;
+    if (r < 0.15) change = 8 + Math.random() * 15;
+    else if (r < 0.35) change = 3 + Math.random() * 5;
+    else if (r < 0.55) change = -2 + Math.random() * 5;
+    else if (r < 0.75) change = -8 + Math.random() * 6;
+    else change = -25 + Math.random() * 17;
+    const price = base * (1 + (Math.random() - 0.5) * 0.15);
+    const vol = price * (Math.random() * 3e7 + 1e6);
+    const cap = price * (Math.random() * 1e8 + 1e7);
+    return {
+      id: c.id, name: c.name, symbol: c.sym.toLowerCase(),
+      current_price: price, price_change_percentage_24h: change,
+      total_volume: vol, market_cap: cap, market_cap_rank: i + 1
+    };
+  }).sort((a, b) => (b.market_cap || 0) - (a.market_cap || 0));
+}
+
+function buildRowsHTML(data, emptyMsg) {
+  if (!data || !data.length) {
+    return `<div class="empty-state">
+      <div class="ico">🔍</div>
+      <div class="txt">${emptyMsg || 'داده‌ای موجود نیست'}</div>
+      <div class="sub">دسته دیگری را امتحان کنید</div>
+    </div>`;
+  }
+  return `<div class="signal-rows">` + data.map((c, i) => {
+    const chg = Number(c.price_change_percentage_24h) || 0;
+    const key = getSignalKey(chg);
+    const sig = SIGNALS[key];
+    const chgCls = chg > 0.05 ? 'chg-up' : (chg < -0.05 ? 'chg-down' : 'chg-flat');
+    const chgTxt = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+    const sym = (c.symbol || '').toUpperCase();
+    const initials = sym.slice(0, 3);
+    return `
+      <div class="sig-row">
+        <div class="sig-rank">${i + 1}</div>
+        <div class="sig-name-cell">
+          <div class="sig-avatar">${initials}</div>
+          <div class="sig-info">
+            <div class="n">${c.name || '—'}</div>
+            <div class="s">${sym}</div>
+          </div>
+        </div>
+        <div class="sig-price">${fmtPrice(c.current_price)}</div>
+        <div class="sig-change ${chgCls}">${chgTxt}</div>
+        <div class="sig-chip ${sig.cls}">${sig.label}</div>
+      </div>`;
+  }).join('') + `</div>`;
+}
+
+function renderMarketList(data, container) {
+  container.innerHTML = buildRowsHTML(data, 'داده‌ای برای نمایش وجود ندارد');
+}
+
+function renderStats(data) {
+  let totalVol = 0, totalChange = 0, bestCoin = null, bestChg = -Infinity;
+  data.forEach(c => {
+    const chg = Number(c.price_change_percentage_24h) || 0;
+    totalVol += Number(c.total_volume) || 0;
+    totalChange += chg;
+    if (chg > bestChg) { bestChg = chg; bestCoin = c; }
+  });
+  const avg = totalChange / data.length;
+  $('totalCoins').textContent = data.length;
+  $('totalVolume').textContent = fmtCompact(totalVol);
+  $('avgChange').textContent = (avg >= 0 ? '+' : '') + avg.toFixed(2) + '%';
+  $('avgChange').style.color = avg >= 0 ? 'var(--green)' : 'var(--red)';
+  $('bestCoin').textContent = bestCoin ? bestCoin.name : '—';
+  $('bestCoin').style.fontSize = bestCoin && bestCoin.name.length > 10 ? '1.05em' : '1.7em';
+  $('marketSub').textContent = `${data.length} رمزارز • بروزرسانی ${new Date().toLocaleTimeString('fa-IR')}`;
+}
+
+let currentFilter = 'all';
+let currentData = [];
+
+function updateFilterCounts() {
+  const counts = { strong_buy: 0, buy: 0, hold: 0, sell: 0, strong_sell: 0 };
+  currentData.forEach(c => {
+    const chg = Number(c.price_change_percentage_24h) || 0;
+    counts[getSignalKey(chg)]++;
+  });
+  Object.keys(counts).forEach(k => {
+    const el = $('opt-' + k);
+    if (el) el.textContent = counts[k];
+  });
+  $('filterCount').textContent = currentData.length + ' رمزارز';
+}
+
+function applyFilter(filter) {
+  currentFilter = filter;
+
+  const isAll = filter === 'all';
+  $('btnShowAll').classList.toggle('active', isAll);
+  $('btnFilterMenu').classList.toggle('active', !isAll);
+
+  document.querySelectorAll('.filter-option').forEach(o => {
+    o.classList.toggle('active', o.dataset.value === filter);
+  });
+
+  let filtered;
+  if (isAll) {
+    filtered = currentData;
+  } else {
+    filtered = currentData.filter(c => getSignalKey(Number(c.price_change_percentage_24h) || 0) === filter);
+  }
+
+  filtered = [...filtered].sort((a, b) => {
+    const ca = Number(a.price_change_percentage_24h) || 0;
+    const cb = Number(b.price_change_percentage_24h) || 0;
+    return cb - ca;
+  });
+
+  const titles = {
+    all: 'همه رمزارزها',
+    strong_buy: '🚀 سیگنال خرید قوی',
+    buy: '📈 سیگنال خرید',
+    hold: '⏸️ سیگنال نگهداری',
+    sell: '📉 سیگنال فروش',
+    strong_sell: '⚠️ سیگنال فروش قوی'
+  };
+  const colors = {
+    all: 'var(--blue)',
+    strong_buy: '#00c97a',
+    buy: 'var(--green)',
+    hold: 'var(--yellow)',
+    sell: 'var(--red)',
+    strong_sell: '#c81e2c'
+  };
+  $('listTitle').textContent = titles[filter];
+  $('listDot').style.background = colors[filter];
+  $('listDot').style.boxShadow = `0 0 10px ${colors[filter]}`;
+  $('listHint').textContent = `${filtered.length} رمزارز یافت شد`;
+
+  $('signalRows').innerHTML = buildRowsHTML(filtered, 'هیچ رمزارزی در این دسته نیست');
+}
+
+async function loadMarket() {
+  const btn = $('marketBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ در حال دریافت';
+
+  $('marketBody').innerHTML = `<div class="loader"><div class="spinner"></div><div>در حال دریافت داده‌های بازار...</div></div>`;
+
+  try {
+    const data = await fetchMarket();
+    currentData = data;
+    renderStats(data);
+    renderMarketList(data, $('marketBody'));
+    updateFilterCounts();
+    applyFilter(currentFilter);
+    showToast('✅ داده‌های بازار بروزرسانی شد');
+  } catch (err) {
+    console.warn('API خطا:', err.message);
+    const mock = generateMockMarket();
+    currentData = mock;
+    renderStats(mock);
+    renderMarketList(mock, $('marketBody'));
+    updateFilterCounts();
+    applyFilter(currentFilter);
+    showToast('⚠️ اتصال به API برقرار نشد — داده نمونه نمایش داده می‌شود');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 بروزرسانی';
+  }
+}
+
+let chartInstance = null;
+
+async function fetchChart(symbol, days) {
+  const url = `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=${days}`;
+  const res = await fetch(url, { headers: { 'accept': 'application/json' } });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if (!data.prices || !data.prices.length) throw new Error('داده خالی');
+  return data.prices;
+}
+
+function generateMockChart(days) {
+  const points = days <= 7 ? 7 * 24 : (days <= 30 ? days * 4 : days);
+  const now = Date.now();
+  const step = (days * 24 * 60 * 60 * 1000) / points;
+  let price = 40000 + Math.random() * 30000;
+  const arr = [];
+  for (let i = points - 1; i >= 0; i--) {
+    price *= 1 + (Math.random() - 0.48) * 0.02;
+    arr.push([now - i * step, price]);
+  }
+  return arr;
+}
+
+async function loadChart() {
+  const symbol = $('chartSymbol').value;
+  const days = parseInt($('chartDays').value, 10);
+  const btn = $('chartBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ بارگذاری';
+
+  let prices;
+  try {
+    prices = await fetchChart(symbol, days);
+  } catch (err) {
+    console.warn('نمودار API خطا:', err.message);
+    prices = generateMockChart(days);
+    showToast('⚠️ نمودار با داده نمونه نمایش داده می‌شود');
+  }
+
+  const labels = prices.map(p => {
+    const d = new Date(p[0]);
+    return days <= 7
+      ? d.toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit' })
+      : d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' });
+  });
+  const values = prices.map(p => p[1]);
+  const first = values[0];
+  const last = values[values.length - 1];
+  const pct = first ? ((last - first) / first) * 100 : 0;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+
+  const diffCls = pct > 0.5 ? 'v-up' : (pct < -0.5 ? 'v-down' : 'v-neutral');
+  const diffSign = pct >= 0 ? '+' : '';
+  $('chartStats').innerHTML = `
+    <div class="chart-stat"><span class="k">قیمت فعلی</span><span class="v v-neutral">${fmtPrice(last)}</span></div>
+    <div class="chart-stat"><span class="k">تغییر دوره</span><span class="v ${diffCls}">${diffSign}${pct.toFixed(2)}%</span></div>
+    <div class="chart-stat"><span class="k">کمترین</span><span class="v v-neutral">${fmtPrice(min)}</span></div>
+    <div class="chart-stat"><span class="k">بیشترین</span><span class="v v-neutral">${fmtPrice(max)}</span></div>
+  `;
+
+  const ctx = $('priceChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 400);
+  grad.addColorStop(0, 'rgba(255,59,107,0.28)');
+  grad.addColorStop(0.5, 'rgba(255,59,107,0.07)');
+  grad.addColorStop(1, 'rgba(255,59,107,0)');
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'قیمت (USD)',
+        data: values,
+        borderColor: '#ff3b6b',
+        borderWidth: 2.5,
+        backgroundColor: grad,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#ff3b6b',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800, easing: 'easeOutQuart' },
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1d2e',
+          titleColor: '#fff',
+          titleFont: { size: 12, weight: '600', family: 'Tahoma' },
+          bodyColor: '#ff8a9c',
+          bodyFont: { size: 14, weight: '700', family: 'Tahoma' },
+          borderColor: 'rgba(255,59,107,0.35)',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 10,
+          displayColors: false,
+          callbacks: { label: c => fmtPrice(c.parsed.y) }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9096a8', maxTicksLimit: 8, font: { size: 10, family: 'Tahoma' }, maxRotation: 0 },
+          grid: { color: 'rgba(20,25,50,0.05)', drawBorder: false }
+        },
+        y: {
+          position: 'right',
+          ticks: {
+            color: '#9096a8',
+            font: { size: 10, family: 'Tahoma' },
+            callback: v => {
+              if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+              if (v >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
+              return '$' + v;
+            }
+          },
+          grid: { color: 'rgba(20,25,50,0.05)', drawBorder: false }
+        }
+      }
+    }
+  });
+
+  btn.disabled = false;
+  btn.textContent = '📊 نمایش';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateSelect();
+
+  $('btnShowAll').addEventListener('click', () => {
+    applyFilter('all');
+    $('filterDropdown').classList.remove('open');
+  });
+
+  $('btnFilterMenu').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $('filterDropdown').classList.toggle('open');
+  });
+
+  document.querySelectorAll('.filter-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      applyFilter(opt.dataset.value);
+      $('filterDropdown').classList.remove('open');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#filterDropdown') && !e.target.closest('#btnFilterMenu')) {
+      $('filterDropdown').classList.remove('open');
+    }
+  });
+
+  $('marketBtn').addEventListener('click', loadMarket);
+  $('chartBtn').addEventListener('click', loadChart);
+
+  loadMarket();
+  loadChart();
+  setInterval(loadMarket, 180000);
+});
+</script>
+</body>
+</html>
