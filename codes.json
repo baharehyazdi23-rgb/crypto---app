@@ -1,0 +1,6 @@
+{
+  "TEST01": { "used": false, "used_at": null, "ip": null },
+  "CRYPTO1": { "used": false, "used_at": null, "ip": null },
+  "CRYPTO2": { "used": false, "used_at": null, "ip": null },
+  "VIP001": { "used": false, "used_at": null, "ip": null }
+}
